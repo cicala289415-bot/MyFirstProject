@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>烏魚屎一族｜友情考驗小測驗</title>
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --card: #111827;
+      --muted: #9ca3af;
+      --text: #e5e7eb;
+      --accent: #22c55e;
+      --bad: #ef4444;
+      --btn: #1f2937;
+      --btn2: #0f172a;
+      --line: #243244;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+      "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+      background: radial-gradient(1200px 700px at 20% 0%, #111b33 0%, var(--bg) 55%);
+      color: var(--text);
+    }
+    .wrap { max-width: 920px; margin: 0 auto; padding: 24px; }
+    header {
+      display: flex; gap: 16px; align-items: flex-start; justify-content: space-between;
+      margin-bottom: 18px;
+    }
+    .title h1 { margin: 0; font-size: 22px; letter-spacing: .5px; }
+    .title p { margin: 6px 0 0; color: var(--muted); line-height: 1.4; }
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.25);
+    }
+    .row { display: grid; grid-template-columns: 1fr; gap: 14px; }
+    @media (min-width: 800px) {
+      .row { grid-template-columns: 2fr 1fr; }
+    }
+    .meta {
+      display:flex; gap: 10px; flex-wrap: wrap; align-items:center;
+      color: var(--muted); font-size: 13px;
+    }
+    .pill {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.03);
+      padding: 6px 10px; border-radius: 999px;
+    }
+    .q { font-size: 18px; line-height: 1.5; margin-top: 10px; }
+    .opts { display: grid; gap: 10px; margin-top: 12px; }
+    button.opt {
+      text-align: left;
+      background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px 12px;
+      color: var(--text);
+      cursor: pointer;
+      transition: transform .05s ease, border-color .15s ease, background .15s ease;
+    }
+    button.opt:hover { transform: translateY(-1px); border-color: rgba(255,255,255,.22); }
+    button.opt[disabled] { cursor: not-allowed; opacity: .9; }
+    .opt.correct { border-color: rgba(34,197,94,.65); background: rgba(34,197,94,.08); }
+    .opt.wrong { border-color: rgba(239,68,68,.65); background: rgba(239,68,68,.07); }
+    .feedback {
+      margin-top: 12px; padding: 12px;
+      border-radius: 12px; border: 1px solid var(--line);
+      background: rgba(15,23,42,.6);
+      display:none;
+    }
+    .feedback.good { border-color: rgba(34,197,94,.55); }
+    .feedback.bad { border-color: rgba(239,68,68,.55); }
+    .actions {
+      display:flex; gap: 10px; margin-top: 14px; justify-content: flex-end; flex-wrap: wrap;
+    }
+    .btn {
+      background: var(--btn);
+      border: 1px solid var(--line);
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 12px;
+      cursor:pointer;
+    }
+    .btn.primary {
+      background: linear-gradient(180deg, rgba(34,197,94,.25), rgba(34,197,94,.08));
+      border-color: rgba(34,197,94,.45);
+    }
+    .btn.ghost {
+      background: transparent;
+    }
+    .scorebox h3 { margin: 0; font-size: 16px; }
+    .scorebox .big { font-size: 34px; margin-top: 8px; }
+    .scorebox .sub { color: var(--muted); margin-top: 4px; line-height: 1.4; }
+    .footer { margin-top: 14px; color: var(--muted); font-size: 12px; }
+    .select {
+      width: 100%;
+      padding: 10px 12px; border-radius: 12px;
+      background: rgba(255,255,255,.03);
+      color: var(--text);
+      border: 1px solid var(--line);
+      outline: none;
+    }
+    .hr { height: 1px; background: var(--line); margin: 14px 0; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="title">
+        <h1>烏魚屎一族｜友情考驗小測驗（可直接點選）</h1>
+        <p>共 <b id="total"></b> 題（2022–2025 每年 10 題）。每題作答後立刻顯示對錯，最後給你成績與稱號。</p>
+      </div>
+      <div style="min-width:220px">
+        <select id="mode" class="select" aria-label="題目模式">
+          <option value="all" selected>全部題目（40題）</option>
+          <option value="2022">只玩 2022（10題）</option>
+          <option value="2023">只玩 2023（10題）</option>
+          <option value="2024">只玩 2024（10題）</option>
+          <option value="2025">只玩 2025（10題）</option>
+        </select>
+        <div style="margin-top:10px">
+          <button id="shuffleBtn" class="btn ghost" title="打亂題目順序">🔀 目前：<span id="shuffleState">不打亂</span></button>
+        </div>
+      </div>
+    </header>
+
+    <div class="row">
+      <section class="card">
+        <div class="meta">
+          <span class="pill">題號：<b id="idx"></b>/<b id="tot2"></b></span>
+          <span class="pill">年份：<b id="year"></b></span>
+          <span class="pill">聊天時間點：<b id="when"></b></span>
+        </div>
+
+        <div class="q" id="q"></div>
+        <div class="opts" id="opts"></div>
+
+        <div class="feedback" id="fb"></div>
+
+        <div class="actions">
+          <button class="btn" id="restart">重新開始</button>
+          <button class="btn primary" id="next" disabled>下一題 →</button>
+        </div>
+
+        <div class="footer">小提醒：題目均取材自群組聊天記錄（不含外部資料）。</div>
+      </section>
+
+      <aside class="card scorebox">
+        <h3>目前成績</h3>
+        <div class="big"><span id="score">0</span> / <span id="tot3">0</span></div>
+        <div class="sub" id="progress">還沒開始，先來一題！</div>
+        <div class="hr"></div>
+        <div id="final" style="display:none">
+          <h3>你的稱號</h3>
+          <div class="big" id="title"></div>
+          <div class="sub" id="desc"></div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+<script>
+  const ALL = [{"year": 2022, "when": "2022/01/19 19:57", "q": "誰在群組剛成立時問「@Willy Shih 有入厝的照片嗎」？", "opts": ["杰（Jie）⚖️", "地財阿賢Holmes", "安安 Annie", "Eìleen艾琳🍀"], "ans": 1}, {"year": 2022, "when": "2022/06/11 10:24", "q": "大家在聊「你畫我猜」時，用的是哪個 App？", "opts": ["WePlay", "Discord", "LINE VOOM", "IG"], "ans": 0}, {"year": 2022, "when": "2022/06/24 08:37", "q": "誰說「出差同行其他兩個都確診」？", "opts": ["Willy Shih", "地財阿賢Holmes", "杰（Jie）⚖️", "chien🥀蒨"], "ans": 2}, {"year": 2022, "when": "2022/06/24 09:46", "q": "看到一堆快篩時，Willy Shih 吐槽了什麼？", "opts": ["公司太佛了", "財富自由了喔", "想當垃圾", "要打麻將嗎"], "ans": 1}, {"year": 2022, "when": "2022/06/25 21:47", "q": "誰貼了連結並說「訓練北梗了」？", "opts": ["安安 Annie", "杰（Jie）⚖️", "地財阿賢Holmes", "Eìleen艾琳🍀"], "ans": 0}, {"year": 2022, "when": "2022/06/27 16:53", "q": "誰說「野外求生我第一天先找安安組隊」？", "opts": ["Willy Shih", "地財阿賢Holmes", "杰（Jie）⚖️", "chien🥀蒨"], "ans": 1}, {"year": 2022, "when": "2022/09/14 20:47", "q": "安安 Annie 推薦的店是？", "opts": ["和牛涮 高雄博愛店", "旭集", "耍鍋", "儀賢鴨肉飯"], "ans": 0}, {"year": 2022, "when": "2022/12/25 14:45", "q": "誰問「陽台可以玩仙女棒嗎」？", "opts": ["杰（Jie）⚖️", "Willy Shih", "地財阿賢Holmes", "安安 Annie"], "ans": 0}, {"year": 2022, "when": "2022/12/27 17:39", "q": "Willy Shih 貼一堆照片後，誰回「賀成交」？", "opts": ["Eìleen艾琳🍀", "杰（Jie）⚖️", "chien🥀蒨", "地財阿賢Holmes"], "ans": 2}, {"year": 2022, "when": "2022/12/28 11:35", "q": "誰提議「31晚上嗎」(在討論吃火鍋/日出行程)？", "opts": ["安安 Annie", "杰（Jie）⚖️", "地財阿賢Holmes", "Willy Shih"], "ans": 1}, {"year": 2023, "when": "2023/02/?? 09:44", "q": "被問「有豆皮壽司嗎」時，Willy Shih 回了什麼超歪答案？", "opts": ["只有豆皮的", "只有包皮的", "只有壽司的", "現在沒了吧"], "ans": 1}, {"year": 2023, "when": "2023/02/?? 13:04", "q": "看到 Airbnb 價格，誰說「俗爆到有點可怕」？", "opts": ["地財阿賢Holmes", "杰（Jie）⚖️", "chien🥀蒨", "Willy Shih"], "ans": 2}, {"year": 2023, "when": "2023/07/20 11:14", "q": "誰用 Richart 轉了新台幣 $1450 給阿賢？", "opts": ["杰（Jie）⚖️", "安安 Annie", "Willy Shih", "Eìleen艾琳🍀"], "ans": 0}, {"year": 2023, "when": "2023/07/24 17:27", "q": "有人問「這週末有要排練嗎」時，Willy Shih 回了哪一天結婚？", "opts": ["7/24", "8/12", "9/31", "12/17"], "ans": 1}, {"year": 2023, "when": "2023/10/15 11:25", "q": "誰說「上次忘記拿貔貅給你」？", "opts": ["安安 Annie", "地財阿賢Holmes", "杰（Jie）⚖️", "chien🥀蒨"], "ans": 1}, {"year": 2023, "when": "2023/10/15 11:25", "q": "那次提到的貔貅「總共」幾隻？", "opts": ["4", "6", "8", "10"], "ans": 1}, {"year": 2023, "when": "2023/12/12 13:30", "q": "在「我女鵝缺什麼」這段，誰回「缺乾爹」？", "opts": ["安安 Annie", "Eìleen艾琳🍀", "chien🥀蒨", "杰（Jie）⚖️"], "ans": 2}, {"year": 2023, "when": "2023/12/14 15:19", "q": "安安問「怎麼原來你們去日本」時，Willy Shih 回什麼？", "opts": ["去開趴囉", "去賞櫻囉", "去吃壽司囉", "去泡湯囉"], "ans": 0}, {"year": 2023, "when": "2023/12/16 10:29", "q": "豬腳要吃哪裡的？Willy Shih 回：", "opts": ["岡山", "萬巒", "東港", "左營"], "ans": 1}, {"year": 2023, "when": "2023/12/12 13:54", "q": "誰說「我監視器都開著」？", "opts": ["地財阿賢Holmes", "Willy Shih", "杰（Jie）⚖️", "安安 Annie"], "ans": 0}, {"year": 2024, "when": "2024/02/05 10:43", "q": "Willy Shih 說北梗在賣什麼，一張 10 塊？", "opts": ["狗狗照片", "貔貅照片", "棒球卡", "露營地票券"], "ans": 0}, {"year": 2024, "when": "2024/02/06 18:39", "q": "誰說「趁頭轉下來時先來待產」？", "opts": ["安安 Annie", "chien🥀蒨", "地財阿賢Holmes", "杰（Jie）⚖️"], "ans": 1}, {"year": 2024, "when": "2024/02/29 12:23", "q": "阿賢問杰「有缺這個嗎」指的是什麼？", "opts": ["尿布台", "嬰兒床", "推車", "奶瓶消毒鍋"], "ans": 1}, {"year": 2024, "when": "2024/04/01 11:04", "q": "安安 Annie 用 Richart 轉了多少錢？", "opts": ["$800", "$1000", "$1200", "$1450"], "ans": 1}, {"year": 2024, "when": "2024/04/02 11:58", "q": "聊到黃牛一人 800 多張票時，Willy Shih 提到誰做了一集節目？", "opts": ["阿滴", "Joeman", "HowHow", "志祺七七"], "ans": 1}, {"year": 2024, "when": "2024/06/26 15:44", "q": "誰吐槽「不可能答案這麼雞巴…太強了吧」？", "opts": ["Willy Shih", "杰（Jie）⚖️", "安安 Annie", "chien🥀蒨"], "ans": 0}, {"year": 2024, "when": "2024/07/15 08:57", "q": "大家在 7/15 一早集體祝福誰生日快樂？", "opts": ["安安 Annie", "Willy Shih", "Eìleen艾琳🍀", "杰（Jie）⚖️"], "ans": 2}, {"year": 2024, "when": "2024/07/14 12:30", "q": "誰貼了 PTT 連結並說「無碼慎入」？", "opts": ["安安 Annie", "Eìleen艾琳🍀", "Willy Shih", "地財阿賢Holmes"], "ans": 1}, {"year": 2024, "when": "2024/10/16 09:43", "q": "Willy Shih 抱怨續保丙式估價 58.6，重勾新的估多少？", "opts": ["60.1", "62.4", "66.4", "68.8"], "ans": 2}, {"year": 2024, "when": "2024/11/20 08:40", "q": "有人看不懂最後一個詞時，杰（Jie）⚖️ 解釋是什麼黨？", "opts": ["蛋蛋黨", "貓貓黨", "螞蟻黨", "火腿黨"], "ans": 0}, {"year": 2025, "when": "2025/02/22 21:00", "q": "聊到看房子時，Willy Shih 說了一句：「啊你們不是要_____」？", "opts": ["去露營", "看房子", "吃火鍋", "打麻將"], "ans": 1}, {"year": 2025, "when": "2025/02/22 21:00", "q": "看到照片後，地財阿賢Holmes 形容成「太子殿下_____」？", "opts": ["拂塵", "寶劍", "披風", "皇冠"], "ans": 0}, {"year": 2025, "when": "2025/02/23 10:52", "q": "杰問「你們在關廟嗎」時，Willy Shih 回了哪句？", "opts": ["回高雄了啦 哈哈哈", "在關廟等你", "改去台東", "我在上班"], "ans": 0}, {"year": 2025, "when": "2025/02/23 11:48", "q": "Willy Shih 問「不來吃_____喔」？", "opts": ["火鍋", "披薩", "豬腳", "豆皮"], "ans": 1}, {"year": 2025, "when": "2025/09/28 13:11", "q": "算錢 8157/3 的結果，杰（Jie）⚖️ 算出多少？", "opts": ["2619", "2719", "2819", "2919"], "ans": 1}, {"year": 2025, "when": "2025/09/28 14:27", "q": "杰貼的匯款帳號開頭是 2033…，銀行是哪一家？", "opts": ["國泰", "玉山", "台新", "台銀"], "ans": 2}, {"year": 2025, "when": "2025/09/28 15:11", "q": "安安說「怎麼跟之前不一樣」時，阿賢玩笑回「_____戶歐」？", "opts": ["人頭", "外匯", "同名", "公會"], "ans": 0}, {"year": 2025, "when": "2025/10/30 10:20", "q": "Willy Shih 貼文後說「差點就_____」？", "opts": ["睡著了", "去了", "遲到", "買了"], "ans": 1}, {"year": 2025, "when": "2025/11/02 12:23", "q": "聊到世界賽時，杰（Jie）⚖️ 說了一句：「_____了啦」？", "opts": ["MVP", "GG", "爽", "到家"], "ans": 0}, {"year": 2025, "when": "2025/11/03 08:59", "q": "提到寵物展 webdm 時，Willy Shih 說誰想去？", "opts": ["北梗", "培根", "阿賢", "安安"], "ans": 1}];
+
+  let shuffleOn = false;
+  let pool = [];
+  let order = [];
+  let i = 0;
+  let score = 0;
+  let answered = false;
+
+  const el = (id) => document.getElementById(id);
+
+  function pickTitle(pct) {
+    if (pct >= 95) return ["友情鑑定王 👑", "你根本是聊天記錄的人形索引（或是你就是當事人😎）"];
+    if (pct >= 85) return ["超強麻吉 🫶", "這不是朋友是家人等級了。"];
+    if (pct >= 70) return ["可靠同溫層 🌤️", "很多梗你都跟得到，但偶爾會被偷襲。"];
+    if (pct >= 50) return ["普通朋友 🙂", "還行！但有些名場面你可能錯過了。"];
+    return ["路人甲 🥲", "先回去補一下群組訊息再來挑戰！"];
+  }
+
+  function makePool() {
+    const mode = el("mode").value;
+    pool = (mode === "all") ? [...ALL] : ALL.filter(x => String(x.year) === mode);
+
+    order = pool.map((_, idx) => idx);
+    if (shuffleOn) {
+      for (let k = order.length - 1; k > 0; k--) {
+        const r = Math.floor(Math.random() * (k + 1));
+        [order[k], order[r]] = [order[r], order[k]];
+      }
+    }
+  }
+
+  function reset() {
+    makePool();
+    i = 0; score = 0; answered = false;
+    el("final").style.display = "none";
+    el("score").textContent = score;
+    el("total").textContent = ALL.length;
+    el("tot2").textContent = pool.length;
+    el("tot3").textContent = pool.length;
+    el("progress").textContent = "還沒開始，先來一題！";
+    render();
+  }
+
+  function render() {
+    const qObj = pool[order[i]];
+    if (!qObj) return;
+
+    el("idx").textContent = i + 1;
+    el("year").textContent = qObj.year;
+    el("when").textContent = qObj.when;
+    el("q").textContent = qObj.q;
+
+    // options
+    const opts = el("opts");
+    opts.innerHTML = "";
+    qObj.opts.forEach((t, idx) => {
+      const b = document.createElement("button");
+      b.className = "opt";
+      b.textContent = `${idx + 1}. ${t}`;
+      b.addEventListener("click", () => choose(idx));
+      opts.appendChild(b);
+    });
+
+    // feedback
+    const fb = el("fb");
+    fb.style.display = "none";
+    fb.className = "feedback";
+    fb.innerHTML = "";
+
+    el("next").disabled = true;
+    answered = false;
+  }
+
+  function choose(pick) {
+    if (answered) return;
+    answered = true;
+
+    const qObj = pool[order[i]];
+    const buttons = [...document.querySelectorAll("button.opt")];
+    buttons.forEach(b => b.disabled = true);
+
+    const correct = qObj.ans;
+    buttons[correct].classList.add("correct");
+
+    const fb = el("fb");
+    if (pick === correct) {
+      score++;
+      fb.classList.add("good");
+      fb.innerHTML = `✅ <b>答對！</b><br>聊天時間點：<b>${qObj.when}</b>（${qObj.year}）`;
+    } else {
+      buttons[pick].classList.add("wrong");
+      fb.classList.add("bad");
+      fb.innerHTML = `❌ <b>答錯！</b><br>正確答案是：<b>${qObj.opts[correct]}</b><br>聊天時間點：<b>${qObj.when}</b>（${qObj.year}）`;
+    }
+    fb.style.display = "block";
+
+    el("score").textContent = score;
+    el("progress").textContent = `已完成 ${i+1} / ${pool.length} 題`;
+
+    el("next").disabled = false;
+
+    if (i === pool.length - 1) {
+      showFinal();
+      el("next").textContent = "看結果 ✅";
+    } else {
+      el("next").textContent = "下一題 →";
+    }
+  }
+
+  function next() {
+    if (!answered) return;
+    if (i < pool.length - 1) {
+      i++;
+      render();
+    } else {
+      showFinal(true);
+    }
+  }
+
+  function showFinal(forceScroll=false) {
+    const pct = pool.length ? (score / pool.length) * 100 : 0;
+    const [t, d] = pickTitle(pct);
+    el("title").textContent = t;
+    el("desc").textContent = `得分 ${score} / ${pool.length}（${pct.toFixed(0)}%）｜${d}`;
+    el("final").style.display = "block";
+    el("progress").textContent = "已結算完成！";
+    if (forceScroll) {
+      document.querySelector(".scorebox").scrollIntoView({behavior:"smooth", block:"start"});
+    }
+  }
+
+  el("next").addEventListener("click", next);
+  el("restart").addEventListener("click", reset);
+  el("mode").addEventListener("change", reset);
+
+  el("shuffleBtn").addEventListener("click", () => {
+    shuffleOn = !shuffleOn;
+    el("shuffleState").textContent = shuffleOn ? "打亂" : "不打亂";
+    reset();
+  });
+
+  reset();
+</script>
+</body>
+</html>
